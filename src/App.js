@@ -1,41 +1,24 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 
 export default function App() {
-    const [repositories, setRespositories] = useState([]);
+    const [location, setLocation] = useState({});
 
-    // corresponde ao componentDidMount
-    useEffect(async () => {
-        const response = await fetch('https://api.github.com/users/ozeiasc');
-        const data = await response.json();
+    useEffect(() => {
+        const watchId = navigator.geolocation.watchPosition(handlePositionReceived);
 
-        setRespositories(data)
+        return () => navigator.geolocation.clearWatch(watchId);
     }, []);
 
-    // corresponde ao componentDidUpdate
-    // nesse formato, a função somente será executada se houver alteração
-    // nas informações da variável 'repositories'
-    useEffect(() => {
-        const filtered = repositories.filter(repo => repo.favorite);
-        document.title = `Você tem ${filtered.length} favoritos`;
-    }, [repositories]);
+    function handlePositionReceived({coords}) {
+        const {latitude, longitude} = coords;
 
-    function handleFavorite(id) {
-        const newRepositories = repositories.map(repo => {
-            return repo.id = id ? {...repo, favorite: !repo.favorite} : {...repo}
-        });
-
-        setRespositories(newRepositories);
+        setLocation({latitude, longitude});
     }
 
     return (
-        <ul>
-            {repositories.map(repo => (
-                <li key={repo.id}>
-                    {repo.name}
-                    {repo.favorite && <span>Favorito</span>}
-                    <button onClick={() => handleFavorite(repo.id)}>Favorite</button>
-                </li>
-            ))}
-        </ul>
+        <>
+            Latitude: {location.latitude} <br/>
+            Longitude: {location.longitude}
+        </>
     )
 }
